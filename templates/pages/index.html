@@ -1,0 +1,89 @@
+{%- import "elements/message.html" as render_message -%} {% extends
+"pages/_base.html" %} {% block title %} Crabot {% endblock %} {% block content %}
+
+<div class="mx-auto w-full max-w-screen-lg px-8">
+  <section class="flex h-screen max-h-screen flex-col pb-8 text-center">
+    <div
+      id="messages"
+      class="flex flex-grow flex-col-reverse gap-4 overflow-y-scroll px-8 py-2"
+      hx-ext="ws"
+      ws-connect="/wc"
+    >
+      {% for message in messages %}
+      <div>{% call render_message::render_message(message) %}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      <form
+        id="form"
+        class="relative w-full"
+        hx-post="/"
+        hx-swap="none"
+        hx-on::after-request="this.reset()"
+        hx-trigger="submit, keyup[keyCode==13 && !shiftKey && !ctrlKey && !altKey]"
+      >
+        <textarea
+          id="prompt"
+          name="prompt"
+          class="w-full resize-none rounded-xl border border-gray-200 px-4 py-3.5 pr-12 shadow-lg outline-none focus:shadow-xl"
+          rows="5"
+          placeholder="Ask me anything!"
+          required
+        ></textarea>
+
+        <button
+          id="submit-button"
+          type="submit"
+          class="absolute right-3 top-2.5 rounded-xl bg-black p-1.5 font-bold text-white transition ease-in-out disabled:cursor-not-allowed disabled:bg-gray-500/80"
+          disabled
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2.5"
+            stroke="currentColor"
+            class="h-5 w-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
+            />
+          </svg>
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Disable button if textarea is invalid
+  const promptInput = document.getElementById('prompt')
+  const submitButton = document.getElementById('submit-button')
+  const form = document.getElementById('form')
+
+  promptInput.addEventListener('input', (event) => {
+    const trimmedValue = promptInput.value.replace(/(\r\n|\n|\r)/gm, '').trim()
+    if (trimmedValue && trimmedValue != '') {
+      submitButton.disabled = false
+    } else {
+      submitButton.disabled = true
+    }
+  })
+
+  // Ignore Enter inputs since it's used to submit.
+  promptInput.addEventListener('keypress', (event) => {
+    if (
+      event.keyCode == 13 &&
+      !event.shiftKey &&
+      !event.shiftKey &&
+      !event.altKey
+    ) {
+      event.preventDefault()
+    }
+  })
+</script>
+
+{% endblock %}

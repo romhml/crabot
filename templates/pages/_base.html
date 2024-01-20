@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/disable-element.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+
+    <script src="/assets/dist/index.js"></script>
+
+    <link
+      href="/assets/dist/main.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://rsms.me/inter/inter.css"
+      rel="stylesheet"
+    />
+
+    <title>{% block title %}{{ title }}{% endblock %}</title>
+
+    <!-- Allow any inheriting page to extend head with additional assets -->
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <div id="content">
+      <!-- Inheriting pages will have their content rendered here, similar to app root in React, Angular, etc. -->
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>
