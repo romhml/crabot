@@ -10,9 +10,15 @@ use tower_livereload::LiveReloadLayer;
 use tracing::info_span;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod model;
 mod router;
-pub mod template;
+mod template;
 
+// TODO:
+// - Stream response using SSE and a fake delay between words.
+// - Update favicon.
+// - Update documentation.
+// - Implement support for real world models (e.g. with candle).
 fn create_app() -> Router {
     tracing_subscriber::registry()
         .with(

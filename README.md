@@ -1,15 +1,16 @@
-# Crabot 
+# Crabot
+A blazingly fast chatbot experiment implemented with Rust and HTMX. 
 
+
+## Getting started
 To install dependencies:
 
 ```bash
-bun install
+make install
 ```
 
 To run:
 
 ```bash
-bun run index.ts
+make dev
 ```
-
-This project was created using `bun init` in bun v1.0.21. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

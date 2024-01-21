@@ -1,19 +1,16 @@
 {%- import "elements/message.html" as render_message -%} {% extends
-"pages/_base.html" %} {% block title %} Crabot {% endblock %} {% block content %}
+"pages/_base.html" %} {% block title %} Crabot {% endblock %} {% block content
+%}
 
 <div class="mx-auto w-full max-w-screen-lg px-8">
-  <section class="flex h-screen max-h-screen flex-col pb-8 text-center">
+  <section class="flex h-screen max-h-screen flex-col py-8 text-center">
     <div
       id="messages"
-      class="flex flex-grow flex-col-reverse gap-4 overflow-y-scroll px-8 py-2"
-      hx-ext="ws"
-      ws-connect="/wc"
+      class="mb-1 flex flex-grow flex-col gap-6 overflow-y-scroll px-8"
     >
-      {% for message in messages %}
-      <div>{% call render_message::render_message(message) %}</div>
-      {% endfor %}
+      {% for message in messages %} {% call
+      render_message::render_message(message) %} {% endfor %}
     </div>
-
     <div>
       <form
         id="form"
