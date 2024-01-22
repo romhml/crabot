@@ -11,7 +11,9 @@ use serde::Deserialize;
 use std::convert::Infallible;
 use uuid::Uuid;
 
-use crate::models::{gpt::GPT3Pipeline, lorem::LoremPipeline, mistral::MistralPipeline, Pipeline};
+use crate::models::{
+    gpt::GPT3Pipeline, lorem::LoremPipeline, mistral::MistralPipeline, ChatModel, Pipeline,
+};
 use crate::template::HtmlTemplate;
 use tokio_stream::StreamExt as _;
 
@@ -19,7 +21,6 @@ pub fn index_router() -> Router {
     Router::new()
         .route("/", get(get_messages))
         .route("/", post(post_message))
-        .route("/sse", post(post_message_sse))
 }
 
 #[derive(Template)]
@@ -32,11 +33,6 @@ async fn get_messages() -> impl IntoResponse {
     // TODO: Add a database?
     let messages = vec![];
     HtmlTemplate(MessagesTemplate { messages })
-}
-
-#[derive(Deserialize, Clone)]
-struct PostMessage {
-    prompt: String,
 }
 
 #[derive(Template)]
@@ -57,49 +53,34 @@ impl MessageTemplate {
     }
 }
 
-async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
-    use fake::faker::lorem::en::*;
-    use fake::Fake;
-
-    let response = MessageTemplate::new(data, Sentence(10..20).fake());
-    HtmlTemplate(response)
+#[derive(Deserialize, Clone)]
+struct PostMessage {
+    prompt: String,
+    #[serde(default)]
+    model: ChatModel,
 }
 
-// Note: This endpoint does not work with HTMX because the SSE extension is based on the
-// EventSource API which only supports GET requests.
-// There's multiple ways around:
-// - Use a standard endpoint to POST the message and a SSE endpoint to get chunks as they are
-//   generated. -> This is not ideal because it requires storing the MPSC channels on the APIs
-//   (becomes stateful).
-//
-// - Extend HTMX with sse.js (https://github.com/mpetazzoni/sse.js) by adding a new verb e.g.
-// hx-sse-post that will trigger the request and listen for events (mix between hx-post and
-// sse-connect). -> Done
-async fn post_message_sse(
+async fn post_message(
     Form(data): Form<PostMessage>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let pipeline: Box<dyn Pipeline> = match std::env::var("MISTRAL_API_KEY") {
-        Ok(_) => Box::new(MistralPipeline {}),
-        Err(_) => Box::new(LoremPipeline {}),
+    let pipeline: Box<dyn Pipeline> = match data.model {
+        ChatModel::GPT3 => Box::new(GPT3Pipeline {}),
+        ChatModel::Mistral => Box::new(MistralPipeline {}),
+        ChatModel::Lorem => Box::new(LoremPipeline {}),
     };
 
     let rx = pipeline.run(data.prompt.clone());
-
     let response = MessageTemplate::new(data, "".into());
-
     let res = response.render().unwrap().replace(['\r', '\n'], "");
 
     let initial_event = once(async move { Ok(Event::default().data(res)) });
 
     let rx_stream = rx.map(move |word| {
-        Ok(Event::default()
-            // .event(format!("chunk-{}", response.id))
-            .event("chunk")
-            .data(format!(
-                "<span hx-swap-oob='beforeend:#chunk-{id}'>{word}</span>",
-                id = response.id,
-                word = word
-            )))
+        Ok(Event::default().event("chunk").data(format!(
+            "<span hx-swap-oob='beforeend:#chunk-{id}'>{word}</span>",
+            id = response.id,
+            word = word
+        )))
     });
 
     let end_event = once(async move { Ok(Event::default().event("end")) });

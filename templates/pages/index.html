@@ -42,7 +42,7 @@
       <form
         id="form"
         class="relative w-full"
-        hx-sse-post="/sse"
+        hx-sse-post="/"
         hx-sse-events="message, chunk, end"
         hx-swap="none"
         hx-on::sse-message="onSSEMessage(event)"
@@ -78,6 +78,23 @@
             />
           </svg>
         </button>
+
+        <div class="flex items-center justify-end">
+          <label
+            for="model"
+            class="text-sm font-medium text-gray-500"
+            >Model:</label
+          >
+          <select
+            id="model"
+            name="model"
+            class="rounded border-none bg-transparent px-2 py-1 text-sm font-medium"
+          >
+            <option value="lorem">Lorem</option>
+            <option value="mistral">Mistral Mini</option>
+            <option value="gpt3">GPT3</option>
+          </select>
+        </div>
       </form>
     </div>
   </section>
@@ -90,7 +107,7 @@
   const messages = document.getElementById('messages')
 
   function resetForm() {
-    form.reset()
+    promptInput.value = ''
     submitButton.disabled = true
   }
 
