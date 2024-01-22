@@ -3,7 +3,8 @@
   <head>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/disable-element.js"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+
+    <!-- <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script> -->
     <script src="https://unpkg.com/htmx.org/dist/ext/debug.js"></script>
 
     <script src="/assets/dist/index.js"></script>
@@ -23,7 +24,10 @@
     {% block head %}{% endblock %}
   </head>
   <body>
-    <div id="content">
+    <div
+      id="content"
+      hx-ext="debug"
+    >
       <!-- Inheriting pages will have their content rendered here, similar to app root in React, Angular, etc. -->
       {% block content %}{% endblock %}
     </div>

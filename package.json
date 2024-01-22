@@ -1,7 +1,9 @@
 {
   "name": "crabot",
   "dependencies": {
-    "react": "^18.2.0"
+    "htmx": "^0.0.2",
+    "react": "^18.2.0",
+    "sse.js": "^2.2.0"
   },
   "devDependencies": {
     "@stencil/core": "^4.10.0",

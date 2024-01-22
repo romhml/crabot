@@ -40,7 +40,7 @@
     <div class="ml-2 text-left">
       <p class="text-md font-bold">Crabot</p>
       <p
-        id="response"
+        id="chunk-{{ message.id }}"
         class="text-md"
       >
         {{ message.response }}
@@ -50,6 +50,9 @@
 </div>
 {% endmacro %}
 
-<div hx-swap-oob="beforeend:#messages">
+<div
+  hx-swap-oob="beforeend:#messages"
+  hx-swap="beforeend scroll:true"
+>
   {% call render_message(message=self) %}
 </div>

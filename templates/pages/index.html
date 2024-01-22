@@ -2,20 +2,26 @@
 "pages/_base.html" %} {% block title %} Crabot {% endblock %} {% block content
 %}
 
-<div class="mx-auto w-full max-w-screen-lg px-8">
+<div
+  class="mx-auto w-full max-w-screen-lg px-8"
+  hx-ext="trigger-sse"
+>
   <section class="flex h-screen max-h-screen flex-col py-8 text-center">
     <div
       id="messages"
       class="mb-1 flex flex-grow flex-col gap-6 overflow-y-scroll px-8"
+      hx-swap="beforeend"
     >
       {% for message in messages %} {% call
       render_message::render_message(message) %} {% endfor %}
     </div>
+
     <div>
       <form
         id="form"
         class="relative w-full"
-        hx-post="/"
+        hx-sse-post="/sse"
+        hx-sse-events="message, chunk"
         hx-swap="none"
         hx-on::after-request="this.reset()"
         hx-trigger="submit, keyup[keyCode==13 && !shiftKey && !ctrlKey && !altKey]"
@@ -56,6 +62,9 @@
 </div>
 
 <script>
+  // TODO: Implement auto scroll when new message is added
+  // TODO: Add transitions
+
   // Disable button if textarea is invalid
   const promptInput = document.getElementById('prompt')
   const submitButton = document.getElementById('submit-button')

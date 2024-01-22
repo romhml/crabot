@@ -10,6 +10,7 @@ use futures::stream::{once, Stream};
 use serde::Deserialize;
 use std::convert::Infallible;
 use tokio_stream::wrappers::ReceiverStream;
+use uuid::Uuid;
 
 use crate::model::Pipeline;
 use crate::template::HtmlTemplate;
@@ -32,12 +33,12 @@ async fn get_messages() -> impl IntoResponse {
     use fake::faker::lorem::en::*;
     use fake::Fake;
 
-    let messages = vec![MessageTemplate {
-        input: PostMessage {
+    let messages = vec![MessageTemplate::new(
+        PostMessage {
             prompt: Sentence(10..20).fake(),
         },
-        response: Sentence(10..100).fake(),
-    }];
+        Sentence(10..100).fake(),
+    )];
     HtmlTemplate(MessagesTemplate { messages })
 }
 
@@ -46,21 +47,29 @@ struct PostMessage {
     prompt: String,
 }
 
-#[derive(Template, Clone)]
+#[derive(Template)]
 #[template(path = "elements/message.html")]
 struct MessageTemplate {
+    id: Uuid,
     input: PostMessage,
     response: String,
+}
+
+impl MessageTemplate {
+    pub fn new(input: PostMessage, response: String) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            input,
+            response,
+        }
+    }
 }
 
 async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
     use fake::faker::lorem::en::*;
     use fake::Fake;
 
-    let response = MessageTemplate {
-        input: data,
-        response: Sentence(10..20).fake(),
-    };
+    let response = MessageTemplate::new(data, Sentence(10..20).fake());
     HtmlTemplate(response)
 }
 
@@ -73,7 +82,7 @@ async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
 //
 // - Extend HTMX with sse.js (https://github.com/mpetazzoni/sse.js) by adding a new verb e.g.
 // hx-sse-post that will trigger the request and listen for events (mix between hx-post and
-// sse-connect).
+// sse-connect). -> Trying this out
 async fn post_message_sse(
     Form(data): Form<PostMessage>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
@@ -81,17 +90,22 @@ async fn post_message_sse(
 
     let rx = pipeline.run(data.prompt.clone());
 
-    let response = MessageTemplate {
-        input: data,
-        response: "".into(),
-    };
+    let response = MessageTemplate::new(data, "".into());
 
     let res = response.render().unwrap().replace(['\r', '\n'], "");
 
-    let initial_event = once(async move { Ok(Event::default().event("m").data(res)) });
+    let initial_event = once(async move { Ok(Event::default().data(res)) });
 
-    let rx_stream =
-        ReceiverStream::new(rx).map(|word| Ok(Event::default().event("chunk").data(word)));
+    let rx_stream = ReceiverStream::new(rx).map(move |word| {
+        Ok(Event::default()
+            // .event(format!("chunk-{}", response.id))
+            .event("chunk")
+            .data(format!(
+                "<span hx-swap-oob='beforeend:#chunk-{id}'>{word}</span>",
+                id = response.id,
+                word = word
+            )))
+    });
 
     let stream = initial_event.chain(rx_stream);
 
