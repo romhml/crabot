@@ -12,7 +12,8 @@
       class="mb-1 flex flex-grow flex-col gap-6 overflow-y-scroll px-8"
     >
       {% if messages.len() > 0 %} {% for message in messages %} {% call
-      render_message::render_message(message) %} {% endfor %} {% else %}
+      render_message::render_message(message, processing = false) %} {% endfor
+      %} {% else %}
       <div
         id="messages-placeholder"
         class="flex flex-grow flex-col items-center justify-center text-center"
@@ -90,19 +91,16 @@
   const submitButton = document.getElementById('submit-button')
   const form = document.getElementById('form')
   const messages = document.getElementById('messages')
-  const messagesPlaceholder = document.getElementById('messages-placeholder')
 
   function onSSEMessage(event) {
     if (event.detail.name === 'message') {
       form.reset()
+      document.getElementById('messages-placeholder')?.remove()
       messages.scrollTop = messages.scrollHeight
-
-      if (messagesPlaceholder) {
-        messagesPlaceholder.remove()
-      }
     }
     if (event.detail.name === 'end') {
       messages.scrollTop = messages.scrollHeight
+      document.getElementById('response-cursor')?.remove()
     }
   }
 

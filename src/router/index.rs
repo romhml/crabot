@@ -75,7 +75,7 @@ async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
 //
 // - Extend HTMX with sse.js (https://github.com/mpetazzoni/sse.js) by adding a new verb e.g.
 // hx-sse-post that will trigger the request and listen for events (mix between hx-post and
-// sse-connect). -> Trying this out
+// sse-connect). -> Done
 async fn post_message_sse(
     Form(data): Form<PostMessage>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {

@@ -1,8 +1,8 @@
-{% macro render_message(message) %}
+{% macro render_message(message, processing) %}
 <div>
   <div class="flex">
     <div
-      class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-gray-400"
+      class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full border border-gray-100 bg-gray-100 text-gray-400"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@
   </div>
   <div class="mt-6 flex">
     <div
-      class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full border border-gray-300 text-orange-600"
+      class="mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full border border-gray-100 text-orange-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -41,10 +41,21 @@
       <p class="text-md font-bold">Crabot</p>
       <p
         id="chunk-{{ message.id }}"
-        class="text-md"
+        class="text-md inline"
+      ></p>
+      {{ message.response }} {% if processing %}
+      <span
+        id="response-cursor"
+        class="relative ml-1 inline-flex h-3 w-3"
       >
-        {{ message.response }}
-      </p>
+        <span
+          class="absolute inline-flex h-full w-full animate-ping rounded-full bg-black opacity-75"
+        ></span>
+        <span
+          class="relative inline-flex h-3 w-3 rounded-full bg-gray-600"
+        ></span>
+      </span>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -54,5 +65,5 @@
   hx-swap-oob="beforeend:#messages"
   hx-swap="beforeend scroll:true"
 >
-  {% call render_message(message=self) %}
+  {% call render_message(message=self, processing = true) %}
 </div>
