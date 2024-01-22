@@ -11,7 +11,7 @@ use serde::Deserialize;
 use std::convert::Infallible;
 use uuid::Uuid;
 
-use crate::models::{gpt::GPT3Pipeline, lorem::LoremPipeline, Pipeline};
+use crate::models::{gpt::GPT3Pipeline, lorem::LoremPipeline, mistral::MistralPipeline, Pipeline};
 use crate::template::HtmlTemplate;
 use tokio_stream::StreamExt as _;
 
@@ -78,8 +78,8 @@ async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
 async fn post_message_sse(
     Form(data): Form<PostMessage>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let pipeline: Box<dyn Pipeline> = match std::env::var("OPENAI_API_KEY") {
-        Ok(_) => Box::new(GPT3Pipeline {}),
+    let pipeline: Box<dyn Pipeline> = match std::env::var("MISTRAL_API_KEY") {
+        Ok(_) => Box::new(MistralPipeline {}),
         Err(_) => Box::new(LoremPipeline {}),
     };
 

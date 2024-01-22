@@ -8,49 +8,39 @@ use crate::{models::Pipeline, utils::sse::parse_event_stream};
 use serde::{Deserialize, Serialize};
 use serde_json;
 
-pub struct GPT3Pipeline {}
+pub struct MistralPipeline {}
 
 #[derive(Debug, Serialize, Deserialize)]
-struct GPT3ChatCompletion {
+struct MistralChatCompletion {
     id: String,
     object: String,
     created: i64,
     model: String,
-    choices: Vec<GPT3Choice>,
+    choices: Vec<MistralChoice>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct GPT3Choice {
+struct MistralChoice {
     index: usize,
-    delta: Option<GPT3Delta>,
+    delta: MistralMessage,
     finish_reason: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-enum GPT3Delta {
-    Simple(String),
-    Complex(ComplexDelta),
-    Empty(EmptyDelta),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct ComplexDelta {
+struct MistralMessage {
+    role: Option<String>,
     content: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct EmptyDelta {}
-
-impl Pipeline for GPT3Pipeline {
+impl Pipeline for MistralPipeline {
     fn run(&self, prompt: String) -> ReceiverStream<String> {
-        let url = "https://api.openai.com/v1/chat/completions";
-        let model = "gpt-3.5-turbo";
+        let url = "https://api.mistral.ai/v1/chat/completions";
+        let model = "mistral-tiny";
 
         let response = ureq::post(url)
             .set(
                 "Authorization",
-                &format!("Bearer {}", std::env::var("OPENAI_API_KEY").unwrap()),
+                &format!("Bearer {}", std::env::var("MISTRAL_API_KEY").unwrap()),
             )
             .send_json(ureq::json!({
                 "model": model,
@@ -77,11 +67,11 @@ impl Pipeline for GPT3Pipeline {
 
                 if event.name == "message" {
                     let completion =
-                        match serde_json::from_str::<GPT3ChatCompletion>(event.data.as_str()) {
+                        match serde_json::from_str::<MistralChatCompletion>(event.data.as_str()) {
                             Ok(c) => c,
                             Err(e) => {
                                 tracing::error!(
-                                    "GPT: Could not deserialize event data:\n{}\n{}",
+                                    "Mistral: Could not deserialize event data:\n{}\n{}",
                                     event.data,
                                     e
                                 );
@@ -90,12 +80,9 @@ impl Pipeline for GPT3Pipeline {
                         };
 
                     for choice in completion.choices {
-                        let msg = match choice.delta {
-                            Some(GPT3Delta::Simple(v)) => v,
-                            Some(GPT3Delta::Complex(c)) => c.content,
-                            _ => continue,
-                        };
-                        tx.send(msg).await.expect("Failed to send chunk to channel");
+                        tx.send(choice.delta.content)
+                            .await
+                            .expect("Failed to send chunk to channel");
                     }
                 }
             }
