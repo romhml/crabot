@@ -11,7 +11,7 @@ use serde::Deserialize;
 use std::convert::Infallible;
 use uuid::Uuid;
 
-use crate::model::{GPT3Pipeline, LoremPipeline, Pipeline};
+use crate::models::{gpt::GPT3Pipeline, lorem::LoremPipeline, Pipeline};
 use crate::template::HtmlTemplate;
 use tokio_stream::StreamExt as _;
 

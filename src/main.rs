@@ -12,14 +12,13 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use dotenv::dotenv;
 
-mod model;
+mod models;
 mod router;
 mod template;
+mod utils;
 
 // TODO:
-// - Update favicon.
 // - Update documentation.
-// - Implement support for real world models (e.g. with candle).
 fn create_app() -> Router {
     tracing_subscriber::registry()
         .with(
