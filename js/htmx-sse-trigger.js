@@ -4,28 +4,6 @@
 
 import { SSE } from 'sse.js'
 
-/**
- * @param {HTMLElement} elt
- * @param {string} name
- * @returns {(string | null)}
- */
-function getRawAttribute(elt, name) {
-  return elt.getAttribute && elt.getAttribute(name)
-}
-
-/**
- *
- * @param {HTMLElement} elt
- * @param {string} qualifiedName
- * @returns {(string | null)}
- */
-function getAttributeValue(elt, qualifiedName) {
-  return (
-    getRawAttribute(elt, qualifiedName) ||
-    getRawAttribute(elt, 'data-' + qualifiedName)
-  )
-}
-
 var VERBS = ['get', 'post', 'put', 'delete', 'patch']
 var VERB_SELECTOR = VERBS.map(function (verb) {
   return '[hx-sse-' + verb + '], [data-hx-sse-' + verb + ']'
@@ -245,6 +223,31 @@ function swap(elt, content) {
   }
 }
 
+/*
+ * HTMX INTERNALS COPY PASTA
+ */
+
+/**
+ * @param {HTMLElement} elt
+ * @param {string} name
+ * @returns {(string | null)}
+ */
+function getRawAttribute(elt, name) {
+  return elt.getAttribute && elt.getAttribute(name)
+}
+
+/**
+ *
+ * @param {HTMLElement} elt
+ * @param {string} qualifiedName
+ * @returns {(string | null)}
+ */
+function getAttributeValue(elt, qualifiedName) {
+  return (
+    getRawAttribute(elt, qualifiedName) ||
+    getRawAttribute(elt, 'data-' + qualifiedName)
+  )
+}
 /**
  * doSettle mirrors much of the functionality in htmx that
  * settles elements after their content has been swapped.

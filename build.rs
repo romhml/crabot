@@ -24,7 +24,7 @@ fn build_tailwind() -> Result<(), Box<dyn Error>> {
 fn build_lib() -> Result<(), Box<dyn Error>> {
     Command::new("sh")
         .arg("-c")
-        .arg("bun build index.js --outdir assets/dist/")
+        .arg("bun build js/ --outdir assets/dist/")
         .spawn()
         .expect("Failed to build lib.");
 
@@ -41,7 +41,7 @@ fn main() {
         exit(1);
     }
 
-    println!("cargo:rerun-if-changed=index.js");
+    println!("cargo:rerun-if-changed=js/*.js");
     if let Err(err) = build_lib() {
         eprintln!("{}", err);
         exit(1);
