@@ -15,7 +15,6 @@ mod router;
 mod template;
 
 // TODO:
-// - Stream response using SSE and a fake delay between words.
 // - Update favicon.
 // - Update documentation.
 // - Implement support for real world models (e.g. with candle).

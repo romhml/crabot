@@ -123,6 +123,8 @@ function triggerSSE(elt) {
           swap(child, event.data)
         }
       })
+
+      api.triggerEvent(elt, 'htmx:sseMessage', { ...event, name: eventName })
     })
   })
 

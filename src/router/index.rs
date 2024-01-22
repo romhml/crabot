@@ -30,15 +30,8 @@ struct MessagesTemplate {
 }
 
 async fn get_messages() -> impl IntoResponse {
-    use fake::faker::lorem::en::*;
-    use fake::Fake;
-
-    let messages = vec![MessageTemplate::new(
-        PostMessage {
-            prompt: Sentence(10..20).fake(),
-        },
-        Sentence(10..100).fake(),
-    )];
+    // TODO: Add a database?
+    let messages = vec![];
     HtmlTemplate(MessagesTemplate { messages })
 }
 
@@ -107,8 +100,8 @@ async fn post_message_sse(
             )))
     });
 
-    let stream = initial_event.chain(rx_stream);
+    let end_event = once(async move { Ok(Event::default().event("end")) });
+    let stream = initial_event.chain(rx_stream).chain(end_event);
 
-    // TODO: Fix HTMX SSE injections
     Sse::new(stream).keep_alive(KeepAlive::default())
 }

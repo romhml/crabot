@@ -21,8 +21,6 @@ impl Pipeline {
 
             for _ in 0..20 {
                 let word: String = word_generator.fake();
-
-                tracing::info!("Generating {}", word);
                 // TODO: Handle errors and properly close the channel to notify the consumer.
                 tx.send(format!("{word} ")).await.unwrap();
                 thread::sleep(Duration::from_millis(100))
