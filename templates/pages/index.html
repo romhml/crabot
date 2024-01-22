@@ -84,21 +84,29 @@
 </div>
 
 <script>
-  // TODO: Add transitions
-
-  // Disable button if textarea is invalid
   const promptInput = document.getElementById('prompt')
   const submitButton = document.getElementById('submit-button')
   const form = document.getElementById('form')
   const messages = document.getElementById('messages')
 
+  function resetForm() {
+    form.reset()
+    submitButton.disabled = true
+  }
+
+  let loading = false
+
   function onSSEMessage(event) {
     if (event.detail.name === 'message') {
-      form.reset()
+      loading = true
+      resetForm()
+
       document.getElementById('messages-placeholder')?.remove()
       messages.scrollTop = messages.scrollHeight
     }
+
     if (event.detail.name === 'end') {
+      loading = false
       messages.scrollTop = messages.scrollHeight
       document.getElementById('response-cursor')?.remove()
     }
@@ -106,7 +114,9 @@
 
   promptInput.addEventListener('input', (event) => {
     const trimmedValue = promptInput.value.replace(/(\r\n|\n|\r)/gm, '').trim()
-    if (trimmedValue && trimmedValue != '') {
+    if (loading) {
+      submitButton.disabled = true
+    } else if (trimmedValue && trimmedValue != '') {
       submitButton.disabled = false
     } else {
       submitButton.disabled = true
@@ -125,5 +135,4 @@
     }
   })
 </script>
-
 {% endblock %}
