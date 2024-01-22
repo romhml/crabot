@@ -10,6 +10,8 @@ use tower_livereload::LiveReloadLayer;
 use tracing::info_span;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use dotenv::dotenv;
+
 mod model;
 mod router;
 mod template;
@@ -64,6 +66,7 @@ fn create_app() -> Router {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
     // TODO: Disable live reload on production
     let app = create_app().layer(LiveReloadLayer::new());
 

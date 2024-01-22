@@ -9,10 +9,9 @@ use axum::{
 use futures::stream::{once, Stream};
 use serde::Deserialize;
 use std::convert::Infallible;
-use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
-use crate::model::Pipeline;
+use crate::model::{GPT3Pipeline, LoremPipeline, Pipeline};
 use crate::template::HtmlTemplate;
 use tokio_stream::StreamExt as _;
 
@@ -79,7 +78,10 @@ async fn post_message(Form(data): Form<PostMessage>) -> impl IntoResponse {
 async fn post_message_sse(
     Form(data): Form<PostMessage>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let pipeline = Pipeline::new();
+    let pipeline: Box<dyn Pipeline> = match std::env::var("OPENAI_API_KEY") {
+        Ok(_) => Box::new(GPT3Pipeline {}),
+        Err(_) => Box::new(LoremPipeline {}),
+    };
 
     let rx = pipeline.run(data.prompt.clone());
 
@@ -89,7 +91,7 @@ async fn post_message_sse(
 
     let initial_event = once(async move { Ok(Event::default().data(res)) });
 
-    let rx_stream = ReceiverStream::new(rx).map(move |word| {
+    let rx_stream = rx.map(move |word| {
         Ok(Event::default()
             // .event(format!("chunk-{}", response.id))
             .event("chunk")
