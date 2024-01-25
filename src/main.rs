@@ -17,8 +17,6 @@ mod router;
 mod template;
 mod utils;
 
-// TODO:
-// - Update documentation.
 fn create_app() -> Router {
     tracing_subscriber::registry()
         .with(

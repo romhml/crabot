@@ -43,10 +43,10 @@
         id="form"
         class="relative w-full"
         hx-sse-post="/"
-        hx-sse-events="message, chunk, end"
-        hx-swap="none"
-        hx-on::sse-message="onSSEMessage(event)"
         hx-trigger="submit, keyup[keyCode==13 && !shiftKey && !ctrlKey && !altKey]"
+        hx-sse-events="message, chunk, end"
+        hx-on::sse-message="onSSEMessage(event)"
+        hx-swap="none"
       >
         <textarea
           id="prompt"
